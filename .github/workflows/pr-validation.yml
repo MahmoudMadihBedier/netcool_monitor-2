@@ -1,0 +1,92 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    name: Validate Pull Request
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR description
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if [ -z "$PR_BODY" ] || [ "$PR_BODY" == "null" ]; then
+            echo "❌ PR must have a description"
+            exit 1
+          fi
+
+          # Check for required sections in PR description
+          if ! echo "$PR_BODY" | grep -q "## Summary"; then
+            echo "❌ PR description must include '## Summary' section"
+            exit 1
+          fi
+
+          if ! echo "$PR_BODY" | grep -q "## Test plan"; then
+            echo "❌ PR description must include '## Test plan' section"
+            exit 1
+          fi
+
+          echo "✅ PR description validation passed"
+
+      - name: Check for issue reference
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          # Check if PR references an issue (either in title or body)
+          if echo "$PR_TITLE $PR_BODY" | grep -qE "#[0-9]+"; then
+            echo "✅ PR references an issue"
+          else
+            echo "⚠️ Warning: PR does not reference an issue. Consider linking to an issue for better tracking."
+          fi
+
+      - name: Check branch naming
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Checking branch: $BRANCH_NAME"
+
+          # Enforce branch naming convention
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|docs|refactor|test)/[a-z0-9-]+$ ]]; then
+            echo "❌ Branch name must follow convention: type/description"
+            echo "   Allowed types: feature, bugfix, hotfix, docs, refactor, test"
+            echo "   Example: feature/add-user-authentication"
+            exit 1
+          fi
+
+          echo "✅ Branch naming validation passed"
+
+      - name: Check commit messages
+        run: |
+          COMMITS=$(git log --format=%s origin/main..HEAD)
+
+          if [ -z "$COMMITS" ]; then
+            echo "⚠️ No commits found to validate"
+            exit 0
+          fi
+
+          echo "Validating commit messages..."
+          echo "$COMMITS" | while read -r commit_msg; do
+            if [[ ! "$commit_msg" =~ ^(feat|fix|docs|style|refactor|test|chore|perf)(\(.+\))?: ]]; then
+              echo "❌ Commit message does not follow Conventional Commits: $commit_msg"
+              echo "   Format: type(scope): description"
+              echo "   Types: feat, fix, docs, style, refactor, test, chore, perf"
+              exit 1
+            fi
+          done
+
+          echo "✅ Commit message validation passed"
+
+      - name: Prevent direct pushes to main
+        if: github.base_ref == 'main' && github.event.pull_request.merged == true
+        run: |
+          echo "⚠️ Warning: Direct push to main detected. All changes should go through PRs."
+          echo "This check is informational. Configure branch protection rules to enforce this."

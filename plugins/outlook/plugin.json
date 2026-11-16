@@ -1,0 +1,8 @@
+{
+ "name": "outlook",
+ "title": "Outlook activity check",
+ "version": "1.0",
+ "entry": "plugin:OutlookPlugin",
+ "requires": [],
+ "enabled": true
+}

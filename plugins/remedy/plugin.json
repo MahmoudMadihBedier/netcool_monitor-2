@@ -1,0 +1,11 @@
+{
+ "name": "remedy",
+ "title": "Global TT (Remedy)",
+ "version": "1.0",
+ "entry": "plugin:RemedyPlugin",
+ "requires": [
+  "records",
+  "mail"
+ ],
+ "enabled": true
+}

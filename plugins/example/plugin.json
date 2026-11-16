@@ -1,0 +1,8 @@
+{
+ "name": "example",
+ "title": "Example plugin (developers)",
+ "version": "1.0",
+ "entry": "plugin:ExamplePlugin",
+ "requires": [],
+ "enabled": false
+}

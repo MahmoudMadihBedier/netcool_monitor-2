@@ -1,0 +1,1 @@
+{ "name": "flows", "title": "Flow recorder (record a browser task, replay it)", "version": "1.0", "entry": "plugin:FlowsPlugin", "requires": [], "enabled": true}

@@ -1,0 +1,8 @@
+{
+ "name": "records",
+ "title": "Records database",
+ "version": "1.0",
+ "entry": "plugin:RecordsPlugin",
+ "requires": [],
+ "enabled": true
+}

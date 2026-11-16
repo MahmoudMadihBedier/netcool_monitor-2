@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="urn:HPD_WebInterface_Integration" xmlns:s0="urn:HPD_WebInterface_Integration"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+ <wsdl:types>
+  <xsd:schema elementFormDefault="qualified" targetNamespace="urn:HPD_WebInterface_Integration">
+   <xsd:element name="TT_Create" type="s0:CreateInputMap"/>
+   <xsd:complexType name="CreateInputMap">
+    <xsd:sequence>
+     <xsd:element name="Submitter" type="xsd:string"/>
+     <xsd:element name="Stage-Submitter__c" type="xsd:string"/>
+     <xsd:element name="Status__c" type="xsd:string"/>
+     <xsd:element name="Assigned_group_ID" type="xsd:string"/>
+     <xsd:element name="Assigned_Group" type="xsd:string"/>
+     <xsd:element name="Assigned_Support_Organization" type="xsd:string"/>
+     <xsd:element name="Assigned_Support_Company" type="xsd:string"/>
+     <xsd:element name="Categorization_Tier_1" type="xsd:string"/>
+     <xsd:element name="Categorization_Tier_2" type="xsd:string"/>
+     <xsd:element name="Categorization_Tier_3" type="xsd:string"/>
+     <xsd:element name="Urgency" type="s0:UrgencyType"/>
+     <xsd:element name="Impact" type="s0:ImpactType"/>
+     <xsd:element name="Contact_Company" type="xsd:string"/>
+     <xsd:element name="Short_Description" type="xsd:string"/>
+     <xsd:element name="Description" type="xsd:string"/>
+     <xsd:element name="Detailed_Decription" type="xsd:string"/>
+     <xsd:element name="Notes" type="xsd:string"/>
+     <xsd:element name="Incident_Type" type="xsd:string"/>
+     <xsd:element name="Service_Type" type="xsd:string"/>
+     <xsd:element name="Actual_Fault_Time" type="xsd:dateTime"/>
+     <xsd:element name="Asset_ID" type="xsd:string"/>
+     <xsd:element name="Service_Affecting" type="s0:YesNoType"/>
+     <xsd:element name="Outage" type="s0:YesNoType"/>
+     <xsd:element name="Sites" type="xsd:string"/>
+     <xsd:element name="AffectedTRUs" type="xsd:int"/>
+    </xsd:sequence>
+   </xsd:complexType>
+   <xsd:simpleType name="UrgencyType"><xsd:restriction base="xsd:string">
+     <xsd:enumeration value="1-Critical"/><xsd:enumeration value="2-High"/>
+     <xsd:enumeration value="3-Medium"/><xsd:enumeration value="4-Low"/></xsd:restriction></xsd:simpleType>
+   <xsd:simpleType name="ImpactType"><xsd:restriction base="xsd:string">
+     <xsd:enumeration value="1-Extensive/Widespread"/><xsd:enumeration value="2-Significant/Large"/>
+     <xsd:enumeration value="3-Moderate/Limited"/><xsd:enumeration value="4-Minor/Localized"/></xsd:restriction></xsd:simpleType>
+   <xsd:simpleType name="YesNoType"><xsd:restriction base="xsd:string">
+     <xsd:enumeration value="Yes"/><xsd:enumeration value="No"/></xsd:restriction></xsd:simpleType>
+   <xsd:element name="TT_CreateResponse" type="s0:CreateOutputMap"/>
+   <xsd:complexType name="CreateOutputMap"><xsd:sequence>
+     <xsd:element name="Incident_Number" type="xsd:string"/></xsd:sequence></xsd:complexType>
+  </xsd:schema>
+ </wsdl:types>
+ <wsdl:message name="TT_CreateSoapIn"><wsdl:part element="s0:TT_Create" name="parameters"/></wsdl:message>
+ <wsdl:message name="TT_CreateSoapOut"><wsdl:part element="s0:TT_CreateResponse" name="parameters"/></wsdl:message>
+ <wsdl:portType name="HPD_WebInterface_IntegrationPortType">
+  <wsdl:operation name="TT_Create"><wsdl:input message="s0:TT_CreateSoapIn"/>
+   <wsdl:output message="s0:TT_CreateSoapOut"/></wsdl:operation>
+ </wsdl:portType>
+ <wsdl:binding name="HPD_WebInterface_IntegrationSoapBinding" type="s0:HPD_WebInterface_IntegrationPortType">
+  <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+  <wsdl:operation name="TT_Create">
+   <soap:operation soapAction="urn:HPD_WebInterface_Integration/TT_Create" style="document"/>
+   <wsdl:input><soap:body use="literal"/></wsdl:input><wsdl:output><soap:body use="literal"/></wsdl:output>
+  </wsdl:operation>
+ </wsdl:binding>
+ <wsdl:service name="HPD_WebInterface_IntegrationService">
+  <wsdl:port binding="s0:HPD_WebInterface_IntegrationSoapBinding" name="HPD_WebInterface_IntegrationSoap">
+   <soap:address location="http://127.0.0.1:18312/arsys/services/ARService?server=remedy-app-intg&amp;webService=HPD_WebInterface_Integration"/>
+  </wsdl:port>
+ </wsdl:service>
+</wsdl:definitions>

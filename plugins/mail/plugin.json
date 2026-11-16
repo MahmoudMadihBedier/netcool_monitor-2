@@ -1,0 +1,8 @@
+{
+ "name": "mail",
+ "title": "Outage mail + Global TT text",
+ "version": "1.0",
+ "entry": "plugin:MailPlugin",
+ "requires": [],
+ "enabled": true
+}

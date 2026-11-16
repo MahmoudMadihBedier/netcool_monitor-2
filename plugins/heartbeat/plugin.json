@@ -1,0 +1,8 @@
+{
+ "name": "heartbeat",
+ "title": "Heartbeat task",
+ "version": "1.0",
+ "entry": "plugin:HeartbeatPlugin",
+ "requires": [],
+ "enabled": true
+}

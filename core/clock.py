@@ -11,6 +11,7 @@ to MOM as its 'timezone' parameter).
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 
 ZONES = {"Asia/Riyadh": 3, "Africa/Johannesburg": 2}
 DEFAULT_ZONE = "Asia/Riyadh"
@@ -44,3 +45,14 @@ def now() -> datetime:
 def from_epoch(seconds: float) -> datetime:
     """Unix seconds -> naive datetime in the selected zone."""
     return datetime.fromtimestamp(seconds, timezone.utc).replace(tzinfo=None) + _offset
+
+
+@lru_cache(maxsize=65536)
+def _from_ms(ms: float, offset: timedelta) -> datetime:
+    return datetime.fromtimestamp(ms / 1000.0, timezone.utc).replace(tzinfo=None) + offset
+
+
+def from_epoch_ms(ms: float) -> datetime:
+    """MOM millisecond timestamp -> naive datetime in the selected zone. Cached: every refresh re-reads the
+    same rows, so the same timestamps come back thousands of times (the zone is part of the key)."""
+    return _from_ms(ms, _offset)

@@ -340,9 +340,9 @@ class NetcoolClient:
             return {}
         try:
             return json.loads(r.text)
-        except ValueError:
+        except ValueError as exc:
             raise ServerError(f"Unexpected reply on {path.split('datasets/')[-1]}: "
-                              f"{_snippet(r.text, 160)}", r.status, _snippet(r.text))
+                              f"{_snippet(r.text, 160)}", r.status, _snippet(r.text)) from exc
 
     def _json(self, method: str, path: str, params: Optional[dict] = None):
         for attempt in (1, 2):
@@ -453,7 +453,7 @@ class NetcoolClient:
         for attempt in (1, 2):
             seen, rows, start, totals = set(), [], 0, []
 
-            def take(d):
+            def take(d, seen=seen, rows=rows, totals=totals):    # this attempt's lists, bound explicitly
                 items = d.get("items", []) or []
                 tot = int(d.get("totalRows", d.get("filteredRows", len(items))) or 0)
                 totals.append(tot)

@@ -25,7 +25,7 @@ class AIPlugin:
     # ---- advisor interface
     def _context(self, outage) -> dict:
         host = self.host
-        sites = sorted({l for s in outage.sites for l in s.logical} | {s.pid for s in outage.sites})
+        sites = sorted(outage.all_site_ids)
         acts = []
         for src in host.activity_sources:                    # Outlook etc. (cached by the source)
             try:

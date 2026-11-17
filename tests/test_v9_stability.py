@@ -15,7 +15,7 @@ from core.config import RuleSettings, ServerSettings, Settings, migrate  # noqa:
 from core.models import NetcoolEvent  # noqa: E402
 from core.netcool_api import NetcoolClient, SessionExpired, conflict_form  # noqa: E402
 from core.outage import OutageEngine  # noqa: E402
-from core.transport import Response, Transport, TransportError  # noqa: E402
+from core.transport import Response, Transport  # noqa: E402
 
 T0 = datetime(2026, 11, 3, 10, 0)
 

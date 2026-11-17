@@ -104,7 +104,12 @@ class Outage:
     @property
     def tt_sites(self) -> list:
         """Every logical site id (GD1234, LD1234 ...) of the outage, sorted."""
-        return sorted({l for s in self.sites for l in s.logical} or {s.pid for s in self.sites})
+        return sorted({lid for s in self.sites for lid in s.logical} or {s.pid for s in self.sites})
+
+    @property
+    def all_site_ids(self) -> set:
+        """Every id the outage's sites are known by: logical ids (GD1234 ...) and physical ids."""
+        return {lid for s in self.sites for lid in s.logical} | {s.pid for s in self.sites}
 
     @property
     def tt_notes(self) -> str:

@@ -104,7 +104,7 @@ class PluginManager:
             return False
 
     def stop_all(self) -> None:
-        for name, (m, inst) in reversed(list(self.loaded.items())):
+        for name, (_mf, inst) in reversed(list(self.loaded.items())):
             try:
                 inst.stop()
             except Exception:

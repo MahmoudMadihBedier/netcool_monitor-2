@@ -46,7 +46,8 @@ class RecordsAndAI(unittest.TestCase):
             host = make_host(d)
             pm = PluginManager(host)
             ms = {m.name: m for m in __import__("kernel").read_manifests()}
-            pm.start(ms["records"]); pm.start(ms["ai"]); pm.start(ms["mail"])
+            for name in ("records", "ai", "mail"):
+                pm.start(ms[name])
             o = outage(5)
             host.bus.publish(Topics.REFRESH, Refresh(1, "3G", "f", "v", "x", [row("1")], [o], {5}, first=True))
             host.bus.publish(Topics.DECISION, Decision(o, False, "PA / planned activity", "PA on H0439"))

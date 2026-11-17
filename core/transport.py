@@ -11,8 +11,11 @@ Both return the same Response object, so the Netcool client does not care which 
 from __future__ import annotations
 
 import concurrent.futures as cf
+import inspect
 import logging
 import queue
+import re
+import textwrap
 import threading
 from dataclasses import dataclass, field
 from typing import Callable, Optional
@@ -190,8 +193,12 @@ _FETCH_MANY_JS = "async ({reqs, timeoutMs, limit}) => {" + _ONE_JS + """
 
 
 # The tool's OWN browser, isolated from the user's Edge (own temporary profile, no shared windows).
+# No background traffic to Google/Microsoft (updates, sign-in, metrics, safe-browsing pings): on company devices the
+# tool's browser talks ONLY to the MOM / Remedy servers the user opens.
 _BROWSER_ARGS = ("--ignore-certificate-errors", "--disable-features=msSmartScreenProtection",
-                 "--no-first-run", "--no-default-browser-check", "--disable-sync")
+                 "--no-first-run", "--no-default-browser-check", "--disable-sync",
+                 "--disable-background-networking", "--disable-component-update", "--disable-domain-reliability",
+                 "--disable-client-side-phishing-detection", "--no-pings", "--metrics-recording-only")
 
 
 def browser_order(pref: str) -> list:
@@ -201,6 +208,35 @@ def browser_order(pref: str) -> list:
     if pref == "edge":
         return ["msedge", "chromium", "chrome"]
     return ["chromium", "msedge", "chrome"]
+
+
+_CONCAT = re.compile(r"if len\(buffer\):\s*\n\s*buffer = buffer \+ data\s*\n\s*else:\s*\n\s*buffer = data")
+
+
+def patch_playwright_pipe() -> bool:
+    """Playwright's pipe reader joins every message with `buffer = buffer + data` in 32 KB steps, so its cost grows
+    with the SQUARE of the message size (one 30 MB MOM read = ~14 GB copied, holding the GIL: high CPU, laggy UI).
+    Take the installed version's own source, change only those lines to a bytearray, compile it back.
+    If the source does not look exactly as expected, nothing is changed. Returns True when the fix is active."""
+    try:
+        from playwright._impl import _transport as pt
+        cls = pt.PipeTransport
+        if getattr(cls.run, "_nsm_linear", False):
+            return True
+        src = textwrap.dedent(inspect.getsource(cls.run))
+        fixed, n = _CONCAT.subn("buffer += data", src)
+        if n != 1 or src.count("buffer = bytes(0)") != 1:
+            log.info("Playwright pipe reader not patched (unknown version layout)")
+            return False
+        fixed = fixed.replace("buffer = bytes(0)", "buffer = bytearray()")     # json.loads accepts bytearray
+        ns: dict = {}
+        exec(compile(fixed, pt.__file__, "exec"), pt.__dict__, ns)               # noqa: S102 - the library's own code
+        ns["run"]._nsm_linear = True
+        cls.run = ns["run"]
+        return True
+    except Exception as exc:                                                     # never block the browser start
+        log.info("Playwright pipe reader not patched: %s", exc)
+        return False
 
 
 class BrowserTransport(Transport):
@@ -236,6 +272,7 @@ class BrowserTransport(Transport):
     def _run(self) -> None:
         try:
             from playwright.sync_api import sync_playwright
+            patch_playwright_pipe()
             pw = sync_playwright().start()
             browser = ctx = page = None
             for ch in self._channels:
@@ -335,22 +372,27 @@ class BrowserTransport(Transport):
                         [r["url"]] if r.get("redirected") else [])
 
     def request_many(self, reqs: list, timeout: float = 90, limit: int = 6) -> list:
+        """`limit` requests run in parallel inside the browser; each batch comes back as its own message,
+        so a big filter is never one huge reply (smaller transfers, the other threads keep running)."""
         if not reqs:
             return []
-        items = []
-        for method, url, params in reqs:
-            items.append({"url": build_url(url, params), "method": method, "headers": {}, "body": None})
+        items = [{"url": build_url(url, params), "method": method, "headers": {}, "body": None}
+                 for method, url, params in reqs]
+        size = max(1, int(limit))
 
-        def job():
+        def job(batch):
             self._ensure_origin_page()
-            return self._page.evaluate(_FETCH_MANY_JS, {"reqs": items, "timeoutMs": int(timeout * 1000),
-                                                        "limit": int(limit)})
-        try:
-            res = self._call(job, timeout * 2)
-        except TransportError:
-            raise
-        except Exception as exc:
-            raise TransportError(f"browser error: {str(exc)[:200]}") from exc
+            return self._page.evaluate(_FETCH_MANY_JS, {"reqs": batch, "timeoutMs": int(timeout * 1000),
+                                                        "limit": size})
+        res: list = []
+        for i in range(0, len(items), size):
+            batch = items[i:i + size]
+            try:
+                res += self._call(lambda b=batch: job(b), timeout * 2)
+            except TransportError:
+                raise
+            except Exception as exc:
+                raise TransportError(f"browser error: {str(exc)[:200]}") from exc
         out = []
         for r in res:
             if not r or not r.get("ok"):

@@ -24,6 +24,7 @@ from kernel import OutageAlert, OutageRef, Refresh, Topics
 from .session_plan import SessionPlan
 
 log = logging.getLogger(__name__)
+_LOG_LEVELS = {"WARN": logging.WARNING, "ALERT": logging.WARNING, "OK": logging.WARNING, "ERROR": logging.ERROR}
 
 
 class SessionWorker(threading.Thread):
@@ -156,8 +157,7 @@ class SessionWorker(threading.Thread):
         self.bus.put(msg)
 
     def _log(self, level: str, text: str) -> None:
-        getattr(log, level.lower() if level not in ("ALERT", "OK") else "warning", log.info)(
-            "[%s] %s", self.session_name, text)
+        log.log(_LOG_LEVELS.get(level, logging.INFO), "[%s] %s", self.session_name, text)
         self._post(m.LogLine(self.sid, level, text))
 
     def _set_state(self, state: str, detail: str = "") -> None:

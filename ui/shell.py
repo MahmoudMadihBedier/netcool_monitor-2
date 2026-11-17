@@ -66,6 +66,14 @@ class Shell:
         self.server_lbl = tk.Label(self.right, text="Not signed in", bg=T.RED, fg="#FDE8E8", font=(T.FONT, T.fs(10)))
         self.server_lbl.pack(side="right")
 
+        # status bar first (side=bottom) so a short window never pushes it out
+        sb = tk.Frame(root, bg=T.WHITE, highlightthickness=1, highlightbackground=T.GREY_3)
+        sb.pack(fill="x", side="bottom")
+        self.status_lbl = tk.Label(sb, text="Ready", bg=T.WHITE, fg=T.GREY_6, font=(T.FONT, T.fs(9)), anchor="w")
+        self.status_lbl.pack(side="left", padx=T.px(10), pady=T.px(3))
+        self.status_right = tk.Frame(sb, bg=T.WHITE)
+        self.status_right.pack(side="right")
+
         # body: sidebar + toolbar + page area
         self.body = tk.Frame(root, bg=T.GREY_1)
         self.body.pack(fill="both", expand=True)
@@ -83,24 +91,22 @@ class Shell:
         self.pages = tk.Frame(self.main, bg=T.GREY_1)
         self.pages.pack(fill="both", expand=True)
 
-        # status bar
-        sb = tk.Frame(root, bg=T.WHITE, highlightthickness=1, highlightbackground=T.GREY_3)
-        sb.pack(fill="x", side="bottom")
-        self.status_lbl = tk.Label(sb, text="Ready", bg=T.WHITE, fg=T.GREY_6, font=(T.FONT, T.fs(9)), anchor="w")
-        self.status_lbl.pack(side="left", padx=T.px(10), pady=T.px(3))
-        self.status_right = tk.Frame(sb, bg=T.WHITE)
-        self.status_right.pack(side="right")
-        self.hide_chrome()
+        self._login: Optional[tk.Widget] = None
 
-    # ---------------------------------------------------------- chrome
-    def hide_chrome(self) -> None:
-        """Login screen: no sidebar / toolbar."""
-        self.sidebar.pack_forget()
-        self.toolbar.pack_forget()
+    # ---------------------------------------------------------- login screen / app screen
+    def show_login(self, login: tk.Widget) -> None:
+        """The sign-in screen covers the whole body (sidebar, toolbar and pages); nothing else is reachable."""
+        self._login = login
+        login.place(in_=self.body, x=0, y=0, relwidth=1, relheight=1)
+        login.lift()
 
-    def show_chrome(self) -> None:
-        self.sidebar.pack(side="left", fill="y", before=self.main)
-        self.toolbar.pack(fill="x", padx=T.px(8), pady=(T.px(6), 0), before=self.pages)
+    def show_app(self) -> None:
+        if self._login is not None:
+            self._login.place_forget()
+
+    @property
+    def login_shown(self) -> bool:
+        return self._login is not None and bool(self._login.winfo_manager())
 
     def status(self, text: str) -> None:
         self.status_lbl.config(text=text)

@@ -1,0 +1,52 @@
+# Code Owners for Netcool Shift Monitor
+# This file defines who must review changes to different parts of the codebase
+
+# Default: All code changes require approval from the repository owner (MahmoudMadihBedier)
+* @MahmoudMadihBedier
+
+# Core application logic - Owner approval required
+core/ @MahmoudMadihBedier
+kernel/ @MahmoudMadihBedier
+main.py @MahmoudMadihBedier
+
+# UI components - Owner approval required
+ui/ @MahmoudMadihBedier
+
+# Plugins - Owner approval required
+plugins/ @MahmoudMadihBedier
+
+# Tests - Owner approval required
+tests/ @MahmoudMadihBedier
+
+# Configuration files - Owner approval required
+*.json @MahmoudMadihBedier
+*.yaml @MahmoudMadihBedier
+*.yml @MahmoudMadihBedier
+*.toml @MahmoudMadihBedier
+*.cfg @MahmoudMadihBedier
+
+# Dependencies - Owner approval required
+requirements.txt @MahmoudMadihBedier
+setup.py @MahmoudMadihBedier
+pyproject.toml @MahmoudMadihBedier
+
+# Build and deployment scripts - Owner approval required
+*.bat @MahmoudMadihBedier
+*.sh @MahmoudMadihBedier
+build_exe.bat @MahmoudMadihBedier
+install.bat @MahmoudMadihBedier
+run.bat @MahmoudMadihBedier
+
+# Documentation - Owner approval required
+*.md @MahmoudMadihBedier
+docs/ @MahmoudMadihBedier
+
+# GitHub workflows - Owner approval required
+.github/ @MahmoudMadihBedier
+
+# Assets - Owner approval required
+assets/ @MahmoudMadihBedier
+data/ @MahmoudMadihBedier
+
+# Version information - Owner approval required
+version_info.txt @MahmoudMadihBedier

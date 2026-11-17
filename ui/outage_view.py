@@ -111,7 +111,7 @@ class OutageDialog(tk.Toplevel):
         ttk.Button(bar, text="Close", command=self.destroy).pack(side="right")
         for label, cmd, primary in reversed(list(actions.items())):
             ttk.Button(bar, text=label, style="Primary.TButton" if primary else "TButton",
-                       command=lambda c=cmd: (c(o), self.destroy() if "Not an outage" in label else None)
+                       command=lambda c=cmd, closes="Not an outage" in label: (c(o), self.destroy() if closes else None)
                        ).pack(side="right", padx=6)
 
     @staticmethod

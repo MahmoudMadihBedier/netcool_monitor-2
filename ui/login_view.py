@@ -58,6 +58,17 @@ class LoginView(tk.Frame):
         self._load_pw()
         (self.pass_e if self.user_v.get() else self.user_cb).focus_set()
 
+    def reset(self, settings: Settings) -> None:
+        """Back to a clean sign-in form (after Sign out) - the same single widget is reused."""
+        self.user_cb.config(values=settings.saved_usernames)
+        self.user_v.set(settings.last_username)
+        self.url_v.set(settings.server.base_url)
+        self.pass_v.set("")
+        self.busy(False)
+        self.msg.config(text="")
+        self._load_pw()
+        (self.pass_e if self.user_v.get() else self.user_cb).focus_set()
+
     def _load_pw(self) -> None:
         pw = self._creds.get(self.user_v.get().strip())
         if pw and not self.pass_v.get():

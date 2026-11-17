@@ -56,7 +56,7 @@ class OutlookPlugin:
         """Search in the background right away, so the result is ready when the engineer looks."""
         if not self.cfg.enabled or a.outage.key in self._cache:
             return
-        sites = sorted({l for s in a.outage.sites for l in s.logical} | {s.pid for s in a.outage.sites})
+        sites = sorted(a.outage.all_site_ids)
         threading.Thread(target=lambda: self.search(sites, a.outage.hub, a.outage.key), daemon=True).start()
 
     # ---- the search

@@ -55,7 +55,7 @@ class RemedyPlugin:
         purpose = host.purpose_of(o)
         host.bus.publish(Topics.DECISION, Decision(o, True, purpose=purpose))
         events = host.outage_events(o)
-        sites = {l for s in o.sites for l in s.logical} | {s.pid for s in o.sites}
+        sites = o.all_site_ids
         mom_tts = sorted({(e.fields or {}).get("TTNumber", "").strip() for e in events if e.site in sites}
                          - {"", "NULL"})
         ai = host.service("ai")

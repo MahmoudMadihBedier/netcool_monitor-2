@@ -351,9 +351,9 @@ class SessionView(ttk.Frame):
         self.actions_menu.add_command(label="Details / chain", command=lambda: self._act(None))
         self.actions_menu.add_separator()
         items = list(self._actions.items()) if self._actions else []
-        for label, cmd, primary in items:
+        for label, cmd, _primary in items:
             self.actions_menu.add_command(label=label, command=lambda c=cmd: self._act(c))
-        for label, cmd, primary in reversed([i for i in items if i[2]]):
+        for label, cmd, _primary in reversed([i for i in items if i[2]]):
             b = ttk.Button(self.action_bar, text=label, style="Small.TButton", command=lambda c=cmd: self._act(c))
             b.pack(side="right", padx=2, before=self.actions_btn)
             self._action_buttons.append(b)

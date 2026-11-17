@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from plugins.ai import nlp  # noqa: E402
-from plugins.ai.brain import MIN_EACH, Brain  # noqa: E402
+from plugins.ai.brain import Brain  # noqa: E402
 from core.outage import Outage, PhysicalSite  # noqa: E402
 
 T0 = datetime(2026, 11, 13, 10, 0)
@@ -27,10 +27,10 @@ def outage(n=5, summary="UtranCell_ServiceUnavailable", fc="TE", area="Haram", h
 
 
 def teach(b, rnd, real_n=8, not_n=8):
-    for i in range(real_n):
+    for _ in range(real_n):
         b.learn_outage(outage(rnd.randint(5, 12), "Microwave link down LOS", "TX", area=rnd.choice(["Haram", "Maadi"]),
                               hub=f"H{rnd.randint(1000, 1100)}"), True, "Down sites (FO outage rules)")
-    for i in range(not_n):
+    for _ in range(not_n):
         b.learn_outage(outage(rnd.randint(4, 6), "Site planned activity upgrade", "PA", area="Zagazig",
                               hub=f"H{rnd.randint(2000, 2100)}"), False, "Down sites (FO outage rules)",
                        "PA / planned activity", "PA team working on the HUB")
@@ -199,7 +199,9 @@ class OwnSound(unittest.TestCase):
             self.assertEqual(sound.install_sound(ok).parent, sound.SOUND_DIR)
 
     def test_volume_scales_builtin_alarm(self):
-        import array, io, wave
+        import array
+        import io
+        import wave
         from core.sound import _alarm_bytes
 
         def peak(v):

@@ -109,8 +109,8 @@ class App(tk.Tk):
         for name, err in self.plugins.failed.items():
             Toast.show(self, f"Plugin '{name}' could not start: {err[:120]}", T.RED_DARK, 9000)
 
-        self.login_view = LoginView(self.shell.pages, self.settings, self.creds, self._do_login)
-        self.login_view.pack(fill="both", expand=True)
+        self.login_view = LoginView(self.shell.body, self.settings, self.creds, self._do_login)
+        self.shell.show_login(self.login_view)          # the tool always starts on the sign-in screen
         self.host.run_bg(lambda: self.cascade.load_initial(self.settings.cascade.active_path),
                          lambda rep, err: self._cascade_changed())
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -247,9 +247,8 @@ class App(tk.Tk):
             self.shell.server_lbl.config(text=f"●  {user}  ·  connected", fg="#FFFFFF")
             self.status(f"Signed in ({self.client.mode} mode). {len(self.filters)} filters, "
                         f"{len(self.views_list)} views loaded.")
-            self.login_view.pack_forget()
-            self.shell.show_chrome()
             self.shell.show_page("Overview")
+            self.shell.show_app()
             self.after(300, self._shift_start_flow)
 
         self.host.run_bg(work, done)
@@ -289,11 +288,8 @@ class App(tk.Tk):
         self.client = self.host.client = None
         self.shift_start = None
         self.shell.server_lbl.config(text="Not signed in", fg="#FDE8E8")
-        self.shell.hide_chrome()
-        for name in self.shell.page_names():
-            self.shell._pages[name][0].pack_forget()
-        self.login_view = LoginView(self.shell.pages, self.settings, self.creds, self._do_login)
-        self.login_view.pack(fill="both", expand=True)
+        self.login_view.reset(self.settings)
+        self.shell.show_login(self.login_view)
 
     # ================================================================ cascaded report
     def upload_cascade(self) -> None:

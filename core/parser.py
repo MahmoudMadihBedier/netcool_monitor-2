@@ -1,9 +1,11 @@
 """Turns WebGUI REST items into NetcoolEvent objects."""
 from __future__ import annotations
 
-from . import clock
 from datetime import datetime
+from functools import lru_cache
 from typing import Optional
+
+from . import clock
 
 from .config import RuleSettings
 from .models import NetcoolEvent
@@ -13,10 +15,11 @@ EMPTY = {"", "NULL", "NONE", "-", "N/A"}
 
 def _to_dt(v) -> Optional[datetime]:
     if isinstance(v, (int, float)) and v > 0:
-        return clock.from_epoch(v / 1000.0)
+        return clock.from_epoch_ms(v)
     return None
 
 
+@lru_cache(maxsize=65536)
 def mom_time(dt: datetime) -> str:
     """MOM display format: '5/12/26, 3:03 PM'."""
     h = dt.hour % 12 or 12

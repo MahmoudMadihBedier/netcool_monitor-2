@@ -35,6 +35,12 @@
 3. Your Remedy login is asked once and kept only in Windows Credential Manager. Nothing is sent without your
    click; a failed send is never retried by itself.
 
+## Contributing
+
+For team members working on this project, please read:
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines and setup instructions
+- [.github/TEAM_WORKFLOW.md](.github/TEAM_WORKFLOW.md) - Team workflow, roles, and governance
+
 ## Write a plugin (developers)
 1. Copy `plugins/example` to `plugins/<name>`, set `name` and `"enabled": true` in `plugin.json`
    (`entry` = `module:Class`, `requires` = plugins that must start first).
